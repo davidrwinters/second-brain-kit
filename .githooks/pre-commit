@@ -1,0 +1,13 @@
+#!/bin/sh
+# Block commits that contain personal information or secrets.
+# Enable once per clone with:  git config core.hooksPath .githooks
+set -e
+ROOT=$(git rev-parse --show-toplevel)
+if [ -n "$(git diff --cached --name-only --diff-filter=ACMR)" ]; then
+  git diff --cached --name-only -z --diff-filter=ACMR | xargs -0 python3 "$ROOT/scripts/privacy_scan.py"
+fi
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --staged --no-banner --redact "$ROOT"
+else
+  echo "pre-commit: gitleaks not installed; skipping the secret scan (brew install gitleaks)" >&2
+fi

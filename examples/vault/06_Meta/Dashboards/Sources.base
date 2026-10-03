@@ -1,0 +1,30 @@
+filters: type == "source"
+properties:
+  file.name:
+    displayName: Document
+  source-type:
+    displayName: Type
+  parent:
+    displayName: Belongs To
+  captured:
+    displayName: Captured
+  origin:
+    displayName: Origin
+views:
+  - type: table
+    name: Recent
+    order:
+      - captured
+      - file.name
+      - source-type
+      - parent
+    limit: 50
+  - type: table
+    name: By Project
+    groupBy:
+      property: parent
+      direction: ASC
+    order:
+      - file.name
+      - source-type
+      - captured

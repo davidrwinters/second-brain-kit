@@ -1,0 +1,15 @@
+# Generic phrases that may appear in this framework even though a word in them might be on
+# a maintainer's private denylist. Keep this list generic. Maintainer-specific exceptions
+# belong in a private allowlist outside the repo:  git config sbk.allowlist /path/outside/repo
+Google Drive
+Google Docs
+Google Doc
+Google Calendar
+Google-native
+non-Google
+stay in Google
+com.google.drivefs
+docs.google.com
+drive.google.com
+support.google.com
+iCloud

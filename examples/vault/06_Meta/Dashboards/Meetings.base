@@ -1,0 +1,30 @@
+filters: type == "meeting"
+properties:
+  file.name:
+    displayName: Meeting
+  date:
+    displayName: Date
+  parent:
+    displayName: Belongs To
+  attendees:
+    displayName: Attendees
+  capture-source:
+    displayName: Source
+views:
+  - type: table
+    name: Recent
+    order:
+      - date
+      - file.name
+      - parent
+      - attendees
+    limit: 50
+  - type: table
+    name: By Project
+    groupBy:
+      property: parent
+      direction: ASC
+    order:
+      - date
+      - file.name
+      - attendees

@@ -1,0 +1,45 @@
+filters:
+  and:
+    - type == "project"
+    - not:
+        - file.inFolder("04_Archive")
+properties:
+  file.name:
+    displayName: Project
+  outcome:
+    displayName: Outcome
+  deadline:
+    displayName: Deadline
+  status:
+    displayName: Status
+  area:
+    displayName: Area
+  updated:
+    displayName: Updated
+views:
+  - type: table
+    name: Active
+    filters: status == "active"
+    order:
+      - file.name
+      - outcome
+      - deadline
+      - area
+      - updated
+  - type: table
+    name: On Hold
+    filters: status == "on-hold"
+    order:
+      - file.name
+      - outcome
+      - updated
+  - type: table
+    name: All
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - status
+      - deadline
+      - updated

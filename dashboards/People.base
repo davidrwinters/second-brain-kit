@@ -1,0 +1,59 @@
+filters: type == "person"
+properties:
+  file.name:
+    displayName: Person
+  relationship:
+    displayName: Relationship
+  company:
+    displayName: Company
+  role:
+    displayName: Role
+  last-contact:
+    displayName: Last Contact
+  next-touch:
+    displayName: Next Touch
+  email:
+    displayName: Email
+  phone:
+    displayName: Phone
+  linkedin:
+    displayName: LinkedIn
+  location:
+    displayName: Location
+  first-met:
+    displayName: First Met
+  updated:
+    displayName: Updated
+views:
+  - type: table
+    name: Next Touch
+    sort:
+      - property: next-touch
+        direction: ASC
+    order:
+      - next-touch
+      - file.name
+      - relationship
+      - company
+      - last-contact
+  - type: table
+    name: By Relationship
+    groupBy:
+      property: relationship
+      direction: ASC
+    order:
+      - file.name
+      - company
+      - role
+      - last-contact
+      - next-touch
+  - type: table
+    name: All
+    order:
+      - file.name
+      - relationship
+      - company
+      - role
+      - last-contact
+      - next-touch
+      - location
