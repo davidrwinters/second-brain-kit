@@ -17,7 +17,7 @@ The vault is plain Markdown. It usually lives in a cloud-synced folder (Google D
 05_Attachments/    Binaries and raw sources. Never edited once written.
   Transcripts/     Raw transcripts, preserved verbatim
   Files/           Original PDFs, documents, images
-06_Meta/
+06_Meta/           Metadata: the files that run the vault, not notes
   Kit/             These rules, the kit version, installed-packs.txt and pack rules (managed by the kit)
   Templates/       One template per note type
   Dashboards/      Obsidian Bases files (.base)

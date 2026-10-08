@@ -56,7 +56,7 @@ your-vault/
 ├── CLAUDE.md, AGENTS.md     Loaders (kit-managed)
 ├── PERSONAL.md              Your rules (yours; never overwritten)
 ├── 00_Inbox/ 01_Projects/ 02_Areas/ 03_Resources/ 04_Archive/ 05_Attachments/
-├── 06_Meta/
+├── 06_Meta/                 Metadata: the files that run the vault, not notes
 │   ├── Kit/                 RULES.md, VERSION, installed-packs.txt, packs/ (kit-managed)
 │   ├── Templates/           Note templates (yours once installed)
 │   └── Dashboards/          Obsidian Bases (yours once installed)
