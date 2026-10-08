@@ -1,6 +1,6 @@
 # second-brain-kit
 
-A starter kit for a personal knowledge base ("second brain") that an AI coding agent helps you run. Your notes are plain Markdown, organized with the **PARA method**, stored in a cloud folder you already use (**Google Drive** by default; iCloud Drive, Dropbox or a local folder also work), read and edited in **Obsidian**, and maintained by **Claude Code** or **Codex**.
+A starter kit for a "second brain": it uses the **PARA method** to organize all of your digital information (notes, documents, meetings, sources, people and projects), with AI coding agents such as **Claude Code** and **Codex** doing the filing, linking and summarizing. Everything is plain Markdown, stored in a cloud folder you already use (**Google Drive** by default; iCloud Drive, Dropbox or a local folder also work), and read and edited in **Obsidian**.
 
 The kit gives the agent a clear set of rules and repeatable skills, so it files, links, summarizes and reviews your notes the same way every time, and asks before it moves anything.
 
@@ -77,3 +77,5 @@ Issues are welcome: bugs, ideas, questions. Pull requests aren't being accepted 
 ## License
 
 [MIT](LICENSE)
+
+Built with the help of AI coding agents.
