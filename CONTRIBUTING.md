@@ -9,6 +9,8 @@ Thanks for your interest.
 
 ## For the maintainer
 
+The full change process (research, build, test matrix, privacy check, review, release) is in [`docs/maintaining.md`](docs/maintaining.md).
+
 Every commit passes a privacy check: `scripts/privacy_scan.py` (a private denylist plus patterns for email addresses, phone numbers, home-directory paths and cloud document IDs) and `gitleaks`, run by the pre-commit hook in `.githooks/`. Enable it once per clone:
 
 ```bash

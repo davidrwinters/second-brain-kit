@@ -71,6 +71,7 @@ your-vault/
 
 - [`docs/guide.md`](docs/guide.md): the full guide (PARA, conventions, cloud storage, Obsidian, agent setup)
 - [`docs/obsidian.md`](docs/obsidian.md): Obsidian settings and everyday use
+- [`docs/maintaining.md`](docs/maintaining.md): how changes to the kit are made, tested and released
 - [The PARA Method](https://fortelabs.com/blog/para/) by Tiago Forte
 
 ## Contributing
