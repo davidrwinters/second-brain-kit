@@ -17,7 +17,7 @@ The kit gives the agent a clear set of rules and repeatable skills, so it files,
 
 - **It's a knowledge base, not a code repo.** Notes live in your cloud storage, which syncs automatically to every device, with no commits and no pushes. This repository holds only the framework; your notes never go in it.
 - **PARA, the whole method.** Projects (outcome and deadline), Areas (ongoing standard), Resources (interests), Archive (inactive). A note's location reflects how actionable it is, not its topic.
-- **Agent-neutral.** Rules load through `CLAUDE.md` (Claude Code) and `AGENTS.md` (Codex and others); skills are mirrored to `.claude/skills/` and `.agents/skills/`.
+- **Agent-neutral.** Claude Code and Codex load the same rules: `AGENTS.md` is generated from the framework rules, your packs and `PERSONAL.md`, Codex reads it directly and Claude Code through a one-line `CLAUDE.md`. Skills are kept identical in `.claude/skills/` and `.agents/skills/`. See *Using Claude Code and Codex together* in the guide.
 
 ## Quick start
 
@@ -30,7 +30,9 @@ cd second-brain-kit
 ./install.sh
 ```
 
-The installer asks where the vault should live (it suggests a folder in Google Drive if it finds one) and which packs you want. Re-run it any time to update: kit-managed files (rules, loaders, skills, pack files) are refreshed. Your notes and `PERSONAL.md` are never touched, and nothing is deleted. Templates and dashboards become yours once installed and are never overwritten, so improvements to them in new kit versions don't apply automatically; compare with the repo's `templates/` and `dashboards/` if you want them. The installer won't overwrite an existing `CLAUDE.md` or `AGENTS.md` without backing it up and asking first.
+The installer asks where the vault should live (it suggests a folder in Google Drive if it finds one) and which packs you want. Re-run it any time to update: kit-managed files (rules, loaders, skills, pack files) are refreshed and `AGENTS.md` is rebuilt. Your notes and `PERSONAL.md` are never touched, and nothing is deleted. Templates and dashboards become yours once installed and are never overwritten, so improvements to them in new kit versions don't apply automatically; compare with the repo's `templates/` and `dashboards/` if you want them. Before it replaces a `CLAUDE.md` or `AGENTS.md` it didn't write, or a kit skill you've edited, it saves a copy in `06_Meta/Logs/`, and on an existing vault that wasn't set up with the kit it asks first. Kit skills are replaced on update, so to customize one, copy it under a new name.
+
+**Upgrading from 0.1:** the first run builds `AGENTS.md` and saves your old loader files to `06_Meta/Logs/` only if you had changed them. Because 0.1 kept no record of the skills it installed, it also saves a copy of each kit skill it updates, in case you had edited it. Skills are now synced in both directions, so a skill that exists in only one of `.claude/skills/` and `.agents/skills/` is copied to the other; delete it from both if you don't want it.
 
 3. **Open the folder in Obsidian** (Open folder as vault). The installer applies recommended settings to a new vault; see `docs/obsidian.md`.
 4. **Start your agent in the vault folder** and paste the prompt from [`SETUP-PROMPT.md`](SETUP-PROMPT.md). It interviews you and builds your areas, projects and people.
@@ -53,14 +55,15 @@ Talk normally; the rules map everyday phrases to skills:
 
 ```
 your-vault/
-├── CLAUDE.md, AGENTS.md     Loaders (kit-managed)
+├── AGENTS.md               The rules every agent loads (generated; never edit)
+├── CLAUDE.md               One-line loader for Claude Code (kit-managed)
 ├── PERSONAL.md              Your rules (yours; never overwritten)
 ├── 00_Inbox/ 01_Projects/ 02_Areas/ 03_Resources/ 04_Archive/ 05_Attachments/
 ├── 06_Meta/                 Metadata: the files that run the vault, not notes
-│   ├── Kit/                 RULES.md, VERSION, installed-packs.txt, packs/ (kit-managed)
+│   ├── Kit/                 RULES.md, VERSION, agent-sync.sh, installed-packs.txt, packs/ (kit-managed)
 │   ├── Templates/           Note templates (yours once installed)
 │   └── Dashboards/          Obsidian Bases (yours once installed)
-├── .claude/skills/          Skills (kit-managed), mirrored to .agents/skills/
+├── .claude/skills/          Skills (kit-managed), kept identical with .agents/skills/
 └── .obsidian/               Settings (only created for a new vault)
 ```
 

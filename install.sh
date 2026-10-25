@@ -95,20 +95,23 @@ for d in 00_Inbox 01_Projects 02_Areas 03_Resources 04_Archive 05_Attachments 06
   mkdir -p "$VAULT/$d"
 done
 
-# 4. Framework rules and version (kit-managed).
+# 4. Framework rules, version and the AGENTS.md builder (kit-managed).
 refresh "$KIT/kit/RULES.md" "$VAULT/06_Meta/Kit/RULES.md"
 refresh "$KIT/kit/VERSION" "$VAULT/06_Meta/Kit/VERSION"
+refresh "$KIT/kit/agent-sync.sh" "$VAULT/06_Meta/Kit/agent-sync.sh"
+chmod +x "$VAULT/06_Meta/Kit/agent-sync.sh"
 
-# 5. Loaders at the vault root. Back up any existing non-kit file first.
-for f in CLAUDE.md AGENTS.md; do
-  dest="$VAULT/$f"
-  if [ -e "$dest" ] && ! grep -q "second-brain-kit" "$dest"; then
-    mkdir -p "$VAULT/06_Meta/Logs"
-    cp "$dest" "$VAULT/06_Meta/Logs/$STAMP-$f.bak"
-    echo "  saved    06_Meta/Logs/$STAMP-$f.bak (your previous $f; move anything you want to keep into PERSONAL.md)"
-  fi
-  refresh "$KIT/loaders/$f" "$dest"
-done
+# 5. CLAUDE.md, a one-line loader. Back up any version that isn't a kit loader as shipped
+#    (a file from before the kit, or rules added to it by hand or by /init).
+#    AGENTS.md is generated in step 9, which backs up a version it didn't write.
+OLD_LOADER="3721682080 542"   # checksum of the v0.1.0 CLAUDE.md loader
+dest="$VAULT/CLAUDE.md"
+if [ -e "$dest" ] && ! cmp -s "$KIT/loaders/CLAUDE.md" "$dest" && [ "$(cksum < "$dest")" != "$OLD_LOADER" ]; then
+  mkdir -p "$VAULT/06_Meta/Logs"
+  cp -p "$dest" "$VAULT/06_Meta/Logs/$STAMP-CLAUDE.md.bak"
+  echo "  saved    06_Meta/Logs/$STAMP-CLAUDE.md.bak (your previous CLAUDE.md; move any rules you want to keep into PERSONAL.md)"
+fi
+refresh "$KIT/loaders/CLAUDE.md" "$dest"
 copy_if_absent "$KIT/personal/PERSONAL.md" "$VAULT/PERSONAL.md"
 
 # 6. Templates and dashboards (yours once installed; never overwritten).
@@ -116,11 +119,24 @@ for t in "$KIT"/templates/*.md; do copy_if_absent "$t" "$VAULT/06_Meta/Templates
 for b in "$KIT"/dashboards/*.base; do copy_if_absent "$b" "$VAULT/06_Meta/Dashboards/$(basename "$b")"; done
 
 # 7. Skills (kit-managed), for Claude Code and Codex.
-install_skill() { # skill dir
-  local name; name="$(basename "$1")"
+install_skill() { # skill dir. Kit skills are replaced on update; a copy edited since install is saved first.
+  local name src side dest rec why
+  name="$(basename "$1")"; src="$1/SKILL.md"
+  rec="$( { grep " $name\$" "$VAULT/06_Meta/Kit/skills.cksum" 2>/dev/null || true; } | head -1 | cut -d' ' -f1,2)"
+  for side in .claude .agents; do
+    dest="$VAULT/$side/skills/$name/SKILL.md"
+    [ -e "$dest" ] && ! cmp -s "$src" "$dest" || continue
+    [ -n "$rec" ] && [ "$(cksum < "$dest")" = "$rec" ] && continue   # unchanged since the kit installed it
+    mkdir -p "$VAULT/06_Meta/Logs/skill-backups/$STAMP/$side/skills/$name"
+    cp -p "$dest" "$VAULT/06_Meta/Logs/skill-backups/$STAMP/$side/skills/$name/SKILL.md"
+    if [ -n "$rec" ]; then why="it had been edited"; else why="no record of the installed version, so saved in case it was edited"; fi
+    echo "  saved    06_Meta/Logs/skill-backups/$STAMP/$side/skills/$name/SKILL.md ($why)"
+  done
   mkdir -p "$VAULT/.claude/skills/$name"
-  refresh "$1/SKILL.md" "$VAULT/.claude/skills/$name/SKILL.md"
+  refresh "$src" "$VAULT/.claude/skills/$name/SKILL.md"
+  echo "$(cksum < "$src") $name" >> "$SKILLS_CKSUM_NEW"
 }
+SKILLS_CKSUM_NEW="$(mktemp "${TMPDIR:-/tmp}/sbk-skills.XXXXXX")"
 for s in "$KIT"/skills/*/; do install_skill "${s%/}"; done
 
 # 8. Packs.
@@ -135,9 +151,12 @@ for p in $PACKS; do
 done
 chmod +x "$VAULT"/06_Meta/Kit/packs/*/*.sh 2>/dev/null || true
 
-# 9. Mirror skills for Codex and other agents (.claude/skills is canonical).
-mkdir -p "$VAULT/.agents/skills"
-rsync -a "$VAULT/.claude/skills/" "$VAULT/.agents/skills/"
+# Record what the kit installed, so the next update can tell an edited skill from an unedited one.
+mv "$SKILLS_CKSUM_NEW" "$VAULT/06_Meta/Kit/skills.cksum"
+
+# 9. Build AGENTS.md from the rules, pack rules and PERSONAL.md, and sync the skill folders
+#    (.claude/skills for Claude Code, .agents/skills for Codex).
+bash "$VAULT/06_Meta/Kit/agent-sync.sh" "$VAULT" | sed 's/^/  /' || echo "  agent-sync reported a problem (above); the rest of the install is done."
 
 # 10. Recommended Obsidian settings, only for a brand-new vault.
 if [ ! -d "$VAULT/.obsidian" ]; then
@@ -152,3 +171,6 @@ echo "  1. Open the folder in Obsidian: Open folder as vault -> $VAULT"
 echo "  2. Start Claude Code or Codex in that folder and paste the prompt from:"
 echo "     $KIT/SETUP-PROMPT.md"
 echo "     (it interviews you and builds your areas and projects)."
+echo "  3. Recommended: add the agent-sync hook and, for Codex, two settings, so the rules"
+echo "     and skills stay current in both agents. See \"Using Claude Code and Codex together\""
+echo "     in $KIT/docs/guide.md"

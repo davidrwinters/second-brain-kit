@@ -43,7 +43,8 @@ Notes store paths, and paths move. Check that file paths and links stored in not
 
 ## 8. Agent files check
 
-- **Skill folders must match:** `diff -rq .claude/skills .agents/skills`. If they differ, `.claude/skills/` is canonical: `rsync -a --delete .claude/skills/ .agents/skills/`.
+- **Run `bash 06_Meta/Kit/agent-sync.sh`** and read its output. It rebuilds `AGENTS.md` if `PERSONAL.md` or the rules changed, and syncs the two skill folders. If it reports that the skill folders still differ, show the differences and ask which version to keep. (A skill deleted from only one folder is copied back from the other; to remove one, delete it from both.) If it warns that `AGENTS.md` is over 32 KB, say so.
+- **`CLAUDE.md` must still be the one-line loader** (`@AGENTS.md`). If rules have been added to it, move them into `PERSONAL.md`, restore the loader line, and run `agent-sync.sh`.
 - **Snapshot `PERSONAL.md`** to `06_Meta/Logs/YYYY-MM-DD-PERSONAL.md.bak` if it changed since the last snapshot. Keep every snapshot; they are the only history.
 
 ## 9. Report

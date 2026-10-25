@@ -5,9 +5,8 @@ After running `./install.sh`, open Claude Code or Codex **in the vault folder** 
 ```text
 Set up my second brain. This folder was just created with second-brain-kit.
 
-First read CLAUDE.md (or AGENTS.md), 06_Meta/Kit/RULES.md, PERSONAL.md, and the RULES.md of
-each pack listed in 06_Meta/Kit/installed-packs.txt. Those files are the specification;
-follow them, not your defaults. In particular: this is a knowledge base, not a software
+First read AGENTS.md. It is generated from 06_Meta/Kit/RULES.md, the rules of each installed
+pack, and PERSONAL.md. It is the specification: follow it, not your defaults. In particular: this is a knowledge base, not a software
 project. Do not run git init, do not add README.md files, and do not create empty folders.
 
 Then interview me in short batches (two or three questions at a time, not all at once):
@@ -24,7 +23,8 @@ Then interview me in short batches (two or three questions at a time, not all at
    attempt). Propose; don't move or delete anything.
 8. Writing preferences.
 
-Record what I tell you about myself, my paths and my preferences in PERSONAL.md. Then create
+Record what I tell you about myself, my paths and my preferences in PERSONAL.md, then run
+bash 06_Meta/Kit/agent-sync.sh so AGENTS.md includes them. Then create
 the Areas, Projects, Resources and People notes from the templates in 06_Meta/Templates,
 with real outcome, deadline and standard values. Show me what you created, and suggest
 three concrete next actions for each project. Finally, run a short weekly-review so I can

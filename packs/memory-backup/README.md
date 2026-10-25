@@ -16,6 +16,8 @@ AI coding agents keep their own memory on the computer, outside the vault, and i
 bash 06_Meta/Kit/packs/memory-backup/backup-agent-memory.sh "<memory folder>" "<vault path>"
 ```
 
-3. **Optional, automatic:** add a Claude Code hook in `~/.claude/settings.json` that runs the script after each reply (`Stop` event). See the Claude Code hooks documentation; ask your agent to set it up.
+3. **Optional, automatic:** add a Claude Code hook in `~/.claude/settings.json` that runs the script after each reply (`Stop` event), next to the `agent-sync.sh` hook described in the guide. See the Claude Code hooks documentation; ask your agent to set it up.
+
+**Other agents read the backup.** The vault copy is also how a second agent (for example Codex, when Claude Code's memory is the one backed up) learns the same lessons: the pack's rules tell every agent to read the memory index there. Other agents never write to it, because each backup replaces the folder; they record new lessons in `06_Meta/agent-lessons.md`, and the agent whose memory it is folds them in.
 
 On a new computer, copy `06_Meta/agent-memory/` back into the agent's memory folder before starting.

@@ -82,9 +82,9 @@ open "obsidian://open?path=$ENC"
 
 ## How the kit maps onto this
 
-- **The rules** (`06_Meta/Kit/RULES.md` in your vault) are loaded every session through `CLAUDE.md` (Claude Code) or `AGENTS.md` (Codex). They are replaced when you update the kit.
-- **Your own rules** go in `PERSONAL.md`, which overrides the framework and is never overwritten.
-- **Skills** in `.claude/skills/` (mirrored to `.agents/skills/`) are the repeatable workflows: capture, inbox processing, new projects, adding sources, finding context, the weekly review, closing projects, and reorganizing storage.
+- **The rules** (`06_Meta/Kit/RULES.md` in your vault) are replaced when you update the kit. Together with each installed pack's rules and your `PERSONAL.md`, they are assembled into **`AGENTS.md`**, the one file every agent loads (see *Using Claude Code and Codex together* below).
+- **Your own rules** go in `PERSONAL.md`, which overrides the framework and is never overwritten. After editing it, run `bash 06_Meta/Kit/agent-sync.sh` (or let the hook do it) so `AGENTS.md` picks up the change.
+- **Skills** in `.claude/skills/` and `.agents/skills/`, kept identical by `agent-sync.sh`, are the repeatable workflows: capture, inbox processing, new projects, adding sources, finding context, the weekly review, closing projects, and reorganizing storage.
 - **Templates and dashboards** in `06_Meta/` are yours to customize once installed.
 - **Packs** add optional capabilities; installed packs are listed in `06_Meta/Kit/installed-packs.txt`.
 
@@ -101,6 +101,60 @@ A second brain accumulates health, financial, family and other people's informat
 ## Agent memory, and moving computers
 
 AI coding agents keep their own **memory files** on the computer, outside the vault (Claude Code's are under `~/.claude/projects/`). They do **not** sync with your cloud storage. The optional **memory-backup pack** copies them into `06_Meta/agent-memory/` so they're backed up with the vault; it can run automatically through an agent hook. Keep a short note in `06_Meta` of what to redo on a new computer: the cloud storage client, Obsidian, your agent, connectors, and any hooks.
+
+---
+
+## Using Claude Code and Codex together
+
+Both agents can work in the same vault and follow the same rules, but they look for different files, so the kit bridges the gap. Each point below was checked by direct test (Claude Code 2.1, Codex 0.164), not taken from documentation alone.
+
+**What each agent loads on its own:**
+
+| File | Claude Code | Codex (CLI and the ChatGPT desktop app) |
+| --- | --- | --- |
+| `CLAUDE.md` | loads it | ignores it |
+| `AGENTS.md` | loads it only if there is no `CLAUDE.md`, or through an `@AGENTS.md` import | loads it |
+| Files named inside `AGENTS.md` | | **not loaded**; the model may or may not open them |
+| `.claude/skills/` | discovers | ignores |
+| `.agents/skills/` | ignores | discovers |
+
+**How the kit uses that.** `AGENTS.md` is generated: `06_Meta/Kit/agent-sync.sh` concatenates the framework rules, each installed pack's rules and `PERSONAL.md` (last, so it wins). `CLAUDE.md` is one line, `@AGENTS.md`. Both agents therefore load identical rules, and the rules never need copying between files. The same script keeps the two skill folders identical: for each file that differs, the newer copy replaces the older, which is saved to `06_Meta/Logs/skill-backups/` first.
+
+**Keep it current automatically.** Without a hook, `AGENTS.md` changes only when `agent-sync.sh` runs (the installer, the weekly review, or after editing `PERSONAL.md`). A `Stop` hook in each agent runs it after every reply. Replace `<vault>` with the absolute path to your vault.
+
+Claude Code, in `~/.claude/settings.json`:
+
+```json
+{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "async": true, "timeout": 30,
+  "command": "bash \"<vault>/06_Meta/Kit/agent-sync.sh\" >/dev/null 2>&1 || true" } ] } ] } }
+```
+
+Codex, in `~/.codex/hooks.json` (then approve it once by typing `/hooks` in Codex):
+
+```json
+{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "timeout": 30,
+  "command": "bash \"<vault>/06_Meta/Kit/agent-sync.sh\" >/dev/null 2>&1 || true" } ] } ] } }
+```
+
+Merge these into any hooks you already have rather than replacing the file.
+
+**Two Codex settings, in `~/.codex/config.toml`** (near the top, before any `[section]`):
+
+```toml
+project_root_markers = [".git", ".obsidian"]
+project_doc_max_bytes = 65536
+```
+
+- **`project_root_markers`:** Codex finds a project's root by looking for `.git`, and a vault has none. Without this, Codex started in a subfolder (say, inside a project) loads no `AGENTS.md` and no skills at all. Obsidian's `.obsidian` folder marks the vault root instead. Keep `.git` in the list so code projects behave as before. This must go in the user-level file; a vault's own `.codex/config.toml` can't set it.
+- **`project_doc_max_bytes`:** Codex stops reading instructions at 32 KB by default and drops the rest without warning. Raising the limit gives `AGENTS.md` room to grow; `agent-sync.sh` warns past 32 KB either way.
+
+**Checking what Codex actually loads.** From the vault folder, `codex debug prompt-input "hi"` prints exactly what Codex would send the model, without calling it. Search the output for a phrase from `PERSONAL.md` or a skill name.
+
+**Claude Code notes.** Recent versions of Claude Code read `AGENTS.md` natively when no `CLAUDE.md` exists. The kit keeps the one-line loader anyway, because anything that recreated a `CLAUDE.md` (such as `/init`) would otherwise silently hide `AGENTS.md`. Started from a subfolder, Claude Code asks once to approve the import; from the vault root it loads silently. Claude Code also deletes session transcripts after 30 days by default; raise `cleanupPeriodDays` in `~/.claude/settings.json` if you want to search old sessions later.
+
+**The ChatGPT desktop app can import Claude Code sessions.** They appear as chats in the app, but each is a frozen, one-way copy: nothing you add in Codex reaches Claude, and the agent's memory is not imported. Start new chats in the vault's project instead of continuing imported ones, and turn the import off in the app if you don't want the copies.
+
+**Don't put symlinks inside a cloud-synced folder.** Linking `.agents/skills` to `.claude/skills` works on disk, but Google Drive for desktop handles symlinks inside a synced folder badly (repeated sync errors and high CPU), which is why the kit copies the skills instead. Links that point into the synced folder from outside it are fine.
 
 ---
 
@@ -127,6 +181,11 @@ AI coding agents keep their own **memory files** on the computer, outside the va
 
 - [Claude Code documentation](https://docs.claude.com/en/docs/claude-code/overview), especially [memory and CLAUDE.md](https://docs.claude.com/en/docs/claude-code/memory), [skills](https://docs.claude.com/en/docs/claude-code/skills), [hooks](https://docs.claude.com/en/docs/claude-code/hooks) and [MCP connectors](https://docs.claude.com/en/docs/claude-code/mcp).
 - [Agent Skills specification](https://agentskills.io): the open format the skills follow.
+
+**Codex**
+
+- [Custom instructions with AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md): how Codex finds and combines `AGENTS.md` files, and the size limit.
+- [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) and [hooks](https://learn.chatgpt.com/docs/hooks).
 
 If a link has moved, search for its title; the concepts are stable even when URLs change.
 
